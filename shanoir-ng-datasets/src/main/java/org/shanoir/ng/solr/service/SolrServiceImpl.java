@@ -129,17 +129,17 @@ public class SolrServiceImpl implements SolrService {
 
 	@Override
 	@Async
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	@Transactional
 	public void indexAll() {
 		List<ShanoirMetadata> documents = new ArrayList<>();
 		Map<Long, List<String>> tags = new HashMap<>();
 		ShanoirEvent event;
 
         try {
-			event = solrServiceImpl.beginIndexationProcess();
-			solrServiceImpl.cleanOldIndex(event);
-			solrServiceImpl.fetchDatasToIndex(event, documents, tags);
-			solrServiceImpl.indexDatas(event, documents, tags);
+			event = beginIndexationProcess();
+			cleanOldIndex(event);
+			fetchDatasToIndex(event, documents, tags);
+			indexDatas(event, documents, tags);
 		} catch (SolrServerException | IOException ignored) {
         }
     }
@@ -159,7 +159,6 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
-	@Transactional
 	protected void indexDataPartition(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags, int indexedSize) throws SolrServerException, IOException {
 		indexDocumentsInSolr(documents, tags);
 		if(Objects.equals(1f, event.getProgress())){
@@ -169,7 +168,6 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
-	@Transactional
 	protected void fetchDatasToIndex(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
 		try {
 			documents.addAll(shanoirMetadataRepository.findAllAsSolrDoc());
@@ -183,7 +181,6 @@ public class SolrServiceImpl implements SolrService {
 		}
 	}
 
-	@Transactional
 	protected void cleanOldIndex(ShanoirEvent event) throws SolrServerException, IOException {
 		try {
 			deleteAll();
