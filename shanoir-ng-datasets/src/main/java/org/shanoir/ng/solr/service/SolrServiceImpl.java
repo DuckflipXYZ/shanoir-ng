@@ -49,6 +49,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,7 +57,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -68,6 +68,7 @@ import org.springframework.util.CollectionUtils;
  *
  */
 @Service
+@Primary
 public class SolrServiceImpl implements SolrService {
 	
 	@Autowired
@@ -129,7 +130,6 @@ public class SolrServiceImpl implements SolrService {
 
 	@Override
 	@Async
-	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void indexAll() {
 		List<ShanoirMetadata> documents = new ArrayList<>();
 		Map<Long, List<String>> tags = new HashMap<>();
@@ -206,6 +206,28 @@ public class SolrServiceImpl implements SolrService {
 				0f);
 		eventService.publishEvent(event);
 		return event;
+	}
+
+	@Async
+	public void indexAllNoAuth() {
+		List<ShanoirMetadata> documents = new ArrayList<>();
+		Map<Long, List<String>> tags = new HashMap<>();
+		ShanoirEvent event;
+
+		try {
+			event = new ShanoirEvent(
+					ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+					null,
+					0L,
+					"Cleaning Solr index...",
+					ShanoirEvent.IN_PROGRESS,
+					0f);
+			eventService.publishEvent(event);
+			solrServiceImpl.cleanOldIndex(event);
+			solrServiceImpl.fetchDatasToIndex(event, documents, tags);
+			solrServiceImpl.indexDatas(event, documents, tags);
+		} catch (SolrServerException | IOException ignored) {
+		}
 	}
 
 	@Transactional
