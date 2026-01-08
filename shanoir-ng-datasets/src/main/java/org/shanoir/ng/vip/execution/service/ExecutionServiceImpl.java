@@ -128,7 +128,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<String> getExecutionStderr(String identifier) {
 
-        String url = vipExecutionUri + "/" + identifier + "/stderr";
+        String url = vipExecutionUri + "/jobs/1/" + identifier + "/stderr";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
@@ -141,7 +141,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     public Mono<String> getExecutionStdout(String identifier) {
-        String url = vipExecutionUri + "/" + identifier + "/stdout";
+        String url = vipExecutionUri + "/jobs/1/" + identifier + "/stdout";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
