@@ -54,8 +54,7 @@ require()
     do
         local value="${!name}"
 
-        if [ -z "$value" ] ; then
-            error "env var '$name' must not be blank"
+        if [ -z "$value" ] && [ "$name" != "KC_HOSTNAME" ]; then            error "env var '$name' must not be blank"
             return
         fi
 
@@ -75,6 +74,7 @@ require()
             SHANOIR_ADMIN_NAME)     ;;
 			SHANOIR_SMTP_HOST) ;;
 			SHANOIR_SMTP_PORT) ;;
+      KC_HOSTNAME) ;;
 			SHANOIR_SMTP_AUTH) match "$name" '^(true|false)$' ;;
 			SHANOIR_SMTP_USERNAME) ;;
 			SHANOIR_SMTP_PASSWORD) ;;

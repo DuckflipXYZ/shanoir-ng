@@ -50,6 +50,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
+      - KC_HOSTNAME
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak:26.2.1"
     volumes:
       - keycloak-logs:/opt/keycloak/data/log
